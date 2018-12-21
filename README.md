@@ -1,4 +1,4 @@
-Project week proposal:
+## Project week proposal:
 
 Create a large world, LambdaMUD style that can be traversed using REST move commands
   ~2000 rooms
