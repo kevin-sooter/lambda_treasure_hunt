@@ -8,6 +8,7 @@ from .models import *
 from rest_framework.decorators import api_view
 import json
 from django.utils import timezone
+from datetime import datetime, timedelta
 
 # instantiate pusher
 pusher = Pusher(app_id=config('PUSHER_APP_ID'), key=config('PUSHER_KEY'), secret=config('PUSHER_SECRET'), cluster=config('PUSHER_CLUSTER'))
@@ -36,7 +37,12 @@ def move(request):
     direction = data['direction']
     room = player.room()
     nextRoomID = None
-    import pdb; pdb.set_trace()
+    cooldown_seconds = 10
+    # import pdb; pdb.set_trace()
+    if player.cooldown > timezone.now():
+        remaining_cooldown = (player.cooldown - timezone.now()).seconds + 1
+        return JsonResponse({"cooldown": remaining_cooldown, 'error_msg':"You must wait to do any actions"}, safe=True)
+    player.cooldown = timezone.now() + timedelta(0,cooldown_seconds)
     if direction == "n":
         nextRoomID = room.n_to
     elif direction == "s":
@@ -56,7 +62,7 @@ def move(request):
             pusher.trigger(f'p-channel-{p_uuid}', u'broadcast', {'message':f'{player.user.username} has walked {dirs[direction]}.'})
         for p_uuid in nextPlayerUUIDs:
             pusher.trigger(f'p-channel-{p_uuid}', u'broadcast', {'message':f'{player.user.username} has entered from the {reverse_dirs[direction]}.'})
-        return JsonResponse({'name':player.user.username, 'title':nextRoom.title, 'description':nextRoom.description, 'players':players, 'error_msg':""}, safe=True)
+        return JsonResponse({'name':player.user.username, 'title':nextRoom.title, 'description':nextRoom.description, 'players':players, "cooldown": cooldown_seconds, 'error_msg':""}, safe=True)
     else:
         players = room.playerNames(player_uuid)
         return JsonResponse({'name':player.user.username, 'title':room.title, 'description':room.description, 'players':players, 'error_msg':"You cannot move that way."}, safe=True)
