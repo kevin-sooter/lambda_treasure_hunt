@@ -7,6 +7,7 @@ from django.contrib.auth.models import User
 from .models import *
 from rest_framework.decorators import api_view
 import json
+from django.utils import timezone
 
 # instantiate pusher
 pusher = Pusher(app_id=config('PUSHER_APP_ID'), key=config('PUSHER_KEY'), secret=config('PUSHER_SECRET'), cluster=config('PUSHER_CLUSTER'))
@@ -35,6 +36,7 @@ def move(request):
     direction = data['direction']
     room = player.room()
     nextRoomID = None
+    import pdb; pdb.set_trace()
     if direction == "n":
         nextRoomID = room.n_to
     elif direction == "s":
