@@ -15,6 +15,7 @@ gunicorn = "*"
 django-heroku = "*"
 django-rest-api = "*"
 celery = "*"
+dj-database-url = "*"
 
 [dev-packages]
 
