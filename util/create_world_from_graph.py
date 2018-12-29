@@ -12,17 +12,20 @@ numRooms = len(roomGraph)
 rooms = [None] * numRooms
 for i in range(0, numRooms):
     x = roomGraph[i][0][0]
-    self.rooms[i] = Room(title=f"Room {i}", description=f"({roomGraph[i][0][0]},{roomGraph[i][0][1]})",id=i)
+    rooms[i] = Room(title=f"Room {i}", description=f"({roomGraph[i][0][0]},{roomGraph[i][0][1]})",id=i)
+    rooms[i].save()
+
+
 for roomID in roomGraph:
-    room = self.rooms[roomID]
+    room = rooms[roomID]
     if 'n' in roomGraph[roomID][1]:
-        self.rooms[roomID].connectRooms(self.rooms[roomGraph[roomID][1]['n']], 'n')
+        rooms[roomID].connectRooms(rooms[roomGraph[roomID][1]['n']], 'n')
     if 's' in roomGraph[roomID][1]:
-        self.rooms[roomID].connectRooms(self.rooms[roomGraph[roomID][1]['s']], 's')
+        rooms[roomID].connectRooms(rooms[roomGraph[roomID][1]['s']], 's')
     if 'e' in roomGraph[roomID][1]:
-        self.rooms[roomID].connectRooms(self.rooms[roomGraph[roomID][1]['e']], 'e')
+        rooms[roomID].connectRooms(rooms[roomGraph[roomID][1]['e']], 'e')
     if 'w' in roomGraph[roomID][1]:
-        self.rooms[roomID].connectRooms(self.rooms[roomGraph[roomID][1]['w']], 'w')
+        rooms[roomID].connectRooms(rooms[roomGraph[roomID][1]['w']], 'w')
 
 players=Player.objects.all()
 for p in players:
