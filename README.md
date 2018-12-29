@@ -37,3 +37,13 @@ print( f"Your treasure is in room: {longest_subsequence(int_list)" )
 curl -X POST -H "Content-Type: application/json" -d '{"username":"testuser", "password":"testpassword"}' localhost:8000/api/login/
 
 curl -X GET -H 'Authorization: Token 547ab6e88f192b85f52157827b957eaf62645732' localhost:8000/api/adv/init/
+
+
+curl -X POST -H 'Authorization: Token 547ab6e88f192b85f52157827b957eaf62645732' -H "Content-Type: application/json" -d '{"direction":"n"}' localhost:8000/api/adv/move/
+
+
+
+
+curl -X POST -H "Content-Type: application/json" -d '{"username":"testuser", "password":"testpassword"}' https://lambda-treasure-hunt.herokuapp.com/api/login/
+
+
