@@ -63,6 +63,13 @@ def create_user_player(sender, instance, created, **kwargs):
 def save_user_player(sender, instance, **kwargs):
     instance.player.save()
 
+class Item(models.Model):
+    player = models.ForeignKey(Player, on_delete=models.CASCADE)
+    room = models.ForeignKey(Room, on_delete=models.CASCADE)
+    name = models.CharField(max_length=20, default="DEFAULT_ITEM")
+    description = models.CharField(max_length=200, default="DEFAULT DESCRIPTION")
+    weight = models.IntegerField(default=1)
+    attributes = models.CharField(max_length=1000, default="{}")
 
 
 
