@@ -38,7 +38,6 @@ def move(request):
     room = player.room()
     nextRoomID = None
     cooldown_seconds = 10
-    # import pdb; pdb.set_trace()
     if player.cooldown > timezone.now():
         remaining_cooldown = (player.cooldown - timezone.now()).seconds + 1
         return JsonResponse({"cooldown": remaining_cooldown, 'error_msg':"You must wait to do any actions"}, safe=True)
