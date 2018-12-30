@@ -37,9 +37,14 @@ for p in players:
 Item.objects.all().delete()
 
 
-t = Item(name="Small Treasure",description="This is a small piece of treasure",weight=2,attributes='{"value":100}')
+t = Item(name="Small Treasure",
+         description="This is a small piece of treasure",
+         weight=2,
+         aliases="small treasure,treasure",
+         value=100,
+         attributes='{"default":1}',
+         room=Room.objects.first())
 t.save()
-Room.objects.first().addItem(t)
 
 
 
