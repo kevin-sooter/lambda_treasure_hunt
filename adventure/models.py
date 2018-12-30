@@ -89,6 +89,7 @@ class Item(models.Model):
     name = models.CharField(max_length=20, default="DEFAULT_ITEM")
     description = models.CharField(max_length=200, default="DEFAULT DESCRIPTION")
     weight = models.IntegerField(default=1)
+    aliases = models.CharField(max_length=200, default="[]")
     attributes = models.CharField(max_length=1000, default="{}")
 
 
