@@ -35,7 +35,10 @@ class Room(models.Model):
         return [p.user.username for p in Player.objects.filter(currentRoom=self.id) if p.id != int(currentPlayerID)]
     def playerUUIDs(self, currentPlayerID):
         return [p.uuid for p in Player.objects.filter(currentRoom=self.id) if p.id != int(currentPlayerID)]
-
+    def addItem(self, item):
+        item.room = self
+        item.player = None
+        item.save()
 
 class Player(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -52,6 +55,10 @@ class Player(models.Model):
         except Room.DoesNotExist:
             self.initialize()
             return self.room()
+    def addItem(self, item):
+        item.player = self
+        item.room = None
+        item.save()
 
 @receiver(post_save, sender=User)
 def create_user_player(sender, instance, created, **kwargs):
