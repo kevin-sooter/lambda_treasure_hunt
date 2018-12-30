@@ -39,6 +39,19 @@ class Room(models.Model):
         item.room = self
         item.player = None
         item.save()
+    def itemNames(self):
+        return [i.name for i in Item.objects.filter(room=self)]
+    def exits(self):
+        exits = []
+        if self.n_to is not None:
+            exits.append("n")
+        if self.s_to is not None:
+            exits.append("s")
+        if self.e_to is not None:
+            exits.append("e")
+        if self.w_to is not None:
+            exits.append("w")
+        return exits
 
 class Player(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)

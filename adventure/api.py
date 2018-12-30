@@ -37,9 +37,10 @@ def move(request):
     direction = data['direction']
     room = player.room()
     nextRoomID = None
-    cooldown_seconds = 10
+    cooldown_seconds = 3
     if player.cooldown > timezone.now():
-        remaining_cooldown = (player.cooldown - timezone.now()).seconds + 1
+        t_delta = (player.cooldown - timezone.now())
+        remaining_cooldown = t_delta.seconds + t_delta.microseconds / 1000000
         return JsonResponse({"cooldown": remaining_cooldown, 'error_msg':"You must wait to do any actions"}, safe=True)
     player.cooldown = timezone.now() + timedelta(0,cooldown_seconds)
     if direction == "n":
@@ -50,33 +51,18 @@ def move(request):
         nextRoomID = room.e_to
     elif direction == "w":
         nextRoomID = room.w_to
-    if nextRoomID is not None and nextRoomID > 0:
+    if nextRoomID is not None and nextRoomID >= 0:
         nextRoom = Room.objects.get(id=nextRoomID)
         player.currentRoom=nextRoomID
         player.save()
         players = nextRoom.playerNames(player_id)
-        currentPlayerUUIDs = room.playerUUIDs(player_id)
-        nextPlayerUUIDs = nextRoom.playerUUIDs(player_id)
-        for p_uuid in currentPlayerUUIDs:
-            pusher.trigger(f'p-channel-{p_uuid}', u'broadcast', {'message':f'{player.user.username} has walked {dirs[direction]}.'})
-        for p_uuid in nextPlayerUUIDs:
-            pusher.trigger(f'p-channel-{p_uuid}', u'broadcast', {'message':f'{player.user.username} has entered from the {reverse_dirs[direction]}.'})
-        return JsonResponse({'name':player.user.username, 'title':nextRoom.title, 'description':nextRoom.description, 'players':players, "cooldown": cooldown_seconds, 'error_msg':""}, safe=True)
+        items = nextRoom.itemNames()
+        exits = nextRoom.exits()
+        return JsonResponse({'name':player.user.username, 'title':nextRoom.title, 'description':nextRoom.description, 'players':players, 'items':items, 'exits':exits, 'cooldown': cooldown_seconds, 'error_msg':""}, safe=True)
     else:
         players = room.playerNames(player_uuid)
-        return JsonResponse({'name':player.user.username, 'title':room.title, 'description':room.description, 'players':players, 'error_msg':"You cannot move that way."}, safe=True)
+        items = room.itemNames()
+        exits = room.exits()
+        return JsonResponse({'name':player.user.username, 'title':room.title, 'description':room.description, 'players':players, 'items':items, 'exits':exits, 'cooldown': cooldown_seconds, 'error_msg':"You cannot move that way."}, safe=True)
 
 
-@csrf_exempt
-@api_view(["POST"])
-def say(request):
-    player = request.user.player
-    player_id = player.id
-    player_uuid = player.uuid
-    data = json.loads(request.body)
-    message = " ".join(data["message"].split(" ")[1:])
-    room = player.room()
-    currentPlayerUUIDs = room.playerUUIDs(player_id)
-    for p_uuid in currentPlayerUUIDs:
-        pusher.trigger(f'p-channel-{p_uuid}', u'broadcast', {'message':f'{player.user.username} says "{message}"'})
-    return JsonResponse({'status':"Success"}, safe=True)

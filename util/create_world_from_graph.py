@@ -32,3 +32,23 @@ for p in players:
   p.currentRoom=rooms[0].id
   p.save()
 
+
+
+Item.objects.all().delete()
+
+
+t = Item(name="Small Treasure",description="This is a small piece of treasure",weight=2,attributes='{"value":100}')
+t.save()
+Room.objects.first().addItem(t)
+
+
+
+
+
+
+
+
+
+
+
+
