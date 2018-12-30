@@ -58,6 +58,9 @@ class Player(models.Model):
     currentRoom = models.IntegerField(default=0)
     uuid = models.UUIDField(default=uuid.uuid4, unique=True)
     cooldown = models.DateTimeField(blank=True, auto_now_add=True)
+    gold = models.IntegerField(default=0)
+    strength = models.IntegerField(default=10)
+    speed = models.IntegerField(default=10)
     def initialize(self):
         if self.currentRoom == 0:
             self.currentRoom = Room.objects.first().id
