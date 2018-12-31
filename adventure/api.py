@@ -13,6 +13,42 @@ from datetime import datetime, timedelta
 # instantiate pusher
 pusher = Pusher(app_id=config('PUSHER_APP_ID'), key=config('PUSHER_KEY'), secret=config('PUSHER_SECRET'), cluster=config('PUSHER_CLUSTER'))
 
+time_factor = 2
+
+PENALTY_ITEM_NOT_FOUND=5
+PENALTY_CANNOT_MOVE_THAT_WAY=5
+
+
+def check_cooldown_error(player):
+    """
+    Return cooldown error if cooldown is bad, None if it's valid
+    """
+    if player.cooldown > timezone.now():
+        t_delta = (player.cooldown - timezone.now())
+        remaining_cooldown = t_delta.seconds + t_delta.microseconds / 1000000
+        return JsonResponse({"cooldown": remaining_cooldown, 'error_msg':"You must wait to do any actions"}, safe=True)
+    return None
+
+def api_response(player, cooldown_seconds, errors=None, messages=None):
+    if errors is None:
+        errors = []
+    if messages is None:
+        messages = []
+    room = player.room()
+    response = JsonResponse({'name':player.user.username,
+                             'title':room.title,
+                             'description':room.description,
+                             'players':room.playerNames(player.id),
+                             'items':room.itemNames(),
+                             'exits':room.exits(),
+                             'cooldown': cooldown_seconds,
+                             'errors': errors,
+                             'messages':messages}, safe=True)
+    return response
+
+
+
+
 @csrf_exempt
 @api_view(["GET"])
 def initialize(request):
@@ -25,24 +61,25 @@ def initialize(request):
     return JsonResponse({'uuid': uuid, 'name':player.user.username, 'title':room.title, 'description':room.description, 'players':players}, safe=True)
 
 
-# @csrf_exempt
 @api_view(["POST"])
 def move(request):
     dirs={"n": "north", "s": "south", "e": "east", "w": "west"}
     reverse_dirs = {"n": "south", "s": "north", "e": "west", "w": "east"}
     player = request.user.player
+
+    cooldown_error = check_cooldown_error(player)
+    if cooldown_error is not None:
+        return cooldown_error
+
     player_id = player.id
-    player_uuid = player.uuid
     data = json.loads(request.body)
     direction = data['direction']
     room = player.room()
     nextRoomID = None
-    cooldown_seconds = 3
-    if player.cooldown > timezone.now():
-        t_delta = (player.cooldown - timezone.now())
-        remaining_cooldown = t_delta.seconds + t_delta.microseconds / 1000000
-        return JsonResponse({"cooldown": remaining_cooldown, 'error_msg':"You must wait to do any actions"}, safe=True)
+    cooldown_seconds = 1.0 * time_factor
     player.cooldown = timezone.now() + timedelta(0,cooldown_seconds)
+    errors = []
+    messages = []
     if direction == "n":
         nextRoomID = room.n_to
     elif direction == "s":
@@ -55,14 +92,65 @@ def move(request):
         nextRoom = Room.objects.get(id=nextRoomID)
         player.currentRoom=nextRoomID
         player.save()
-        players = nextRoom.playerNames(player_id)
-        items = nextRoom.itemNames()
-        exits = nextRoom.exits()
-        return JsonResponse({'name':player.user.username, 'title':nextRoom.title, 'description':nextRoom.description, 'players':players, 'items':items, 'exits':exits, 'cooldown': cooldown_seconds, 'error_msg':""}, safe=True)
+        messages.append(f"You have walked {dirs[direction]}.")
     else:
-        players = room.playerNames(player_uuid)
-        items = room.itemNames()
-        exits = room.exits()
-        return JsonResponse({'name':player.user.username, 'title':room.title, 'description':room.description, 'players':players, 'items':items, 'exits':exits, 'cooldown': cooldown_seconds, 'error_msg':"You cannot move that way."}, safe=True)
+        errors.append(f"You cannot move that way: +{PENALTY_CANNOT_MOVE_THAT_WAY} cooldown")
+    return api_response(player, cooldown_seconds, errors=errors, messages=messages)
+
+
+
+
+@api_view(["POST"])
+def take(request):
+    player = request.user.player
+
+    cooldown_error = check_cooldown_error(player)
+    if cooldown_error is not None:
+        return cooldown_error
+
+    data = json.loads(request.body)
+    alias = data['name']
+    room = player.room()
+    item = room.findItemByAlias(alias)
+    cooldown_seconds = 0.2 * time_factor
+    if item is None:
+        cooldown_seconds += PENALTY_ITEM_NOT_FOUND
+    player.cooldown = timezone.now() + timedelta(0,cooldown_seconds)
+    errors = []
+    messages = []
+    if item is None:
+        errors.append(f"Item not found: +{PENALTY_ITEM_NOT_FOUND} cooldown")
+    else:
+        messages.append(f"You have picked up {item.name}")
+        player.addItem(item)
+    return api_response(player, cooldown_seconds, errors=errors, messages=messages)
+
+
+@api_view(["POST"])
+def drop(request):
+    player = request.user.player
+
+    cooldown_error = check_cooldown_error(player)
+    if cooldown_error is not None:
+        return cooldown_error
+
+    data = json.loads(request.body)
+    alias = data['name']
+    room = player.room()
+    item = player.findItemByAlias(alias)
+    cooldown_seconds = 0.2 * time_factor
+    if item is None:
+        cooldown_seconds += PENALTY_ITEM_NOT_FOUND
+    player.cooldown = timezone.now() + timedelta(0,cooldown_seconds)
+    errors = []
+    messages = []
+    if item is None:
+        errors.append(f"Item not found: +{PENALTY_ITEM_NOT_FOUND} cooldown")
+    else:
+        messages.append(f"You have dropped {item.name}")
+        room.addItem(item)
+    return api_response(player, cooldown_seconds, errors=errors, messages=messages)
+
+
 
 

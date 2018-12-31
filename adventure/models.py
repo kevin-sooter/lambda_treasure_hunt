@@ -39,6 +39,12 @@ class Room(models.Model):
         item.room = self
         item.player = None
         item.save()
+    def findItemByAlias(self, alias):
+        lower_alias = alias.lower()
+        for i in Item.objects.filter(room=self):
+            if lower_alias in i.aliases.split(","):
+                return i
+        return None
     def itemNames(self):
         return [i.name for i in Item.objects.filter(room=self)]
     def exits(self):
@@ -75,6 +81,12 @@ class Player(models.Model):
         item.player = self
         item.room = None
         item.save()
+    def findItemByAlias(self, alias):
+        lower_alias = alias.lower()
+        for i in Item.objects.filter(player=self):
+            if lower_alias in i.aliases.split(","):
+                return i
+        return None
 
 @receiver(post_save, sender=User)
 def create_user_player(sender, instance, created, **kwargs):
