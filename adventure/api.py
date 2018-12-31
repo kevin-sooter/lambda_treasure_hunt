@@ -15,8 +15,15 @@ pusher = Pusher(app_id=config('PUSHER_APP_ID'), key=config('PUSHER_KEY'), secret
 
 time_factor = 2
 
+
+
+STORE_ROOM_ID=1
+
+
+
 PENALTY_ITEM_NOT_FOUND=5
 PENALTY_CANNOT_MOVE_THAT_WAY=5
+
 
 
 def check_cooldown_error(player):
