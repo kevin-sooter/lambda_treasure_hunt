@@ -35,8 +35,7 @@ def api_response(player, cooldown_seconds, errors=None, messages=None):
     if messages is None:
         messages = []
     room = player.room()
-    response = JsonResponse({'name':player.user.username,
-                             'title':room.title,
+    response = JsonResponse({'title':room.title,
                              'description':room.description,
                              'players':room.playerNames(player.id),
                              'items':room.itemNames(),
@@ -63,16 +62,16 @@ def initialize(request):
 
 @api_view(["POST"])
 def move(request):
-    dirs={"n": "north", "s": "south", "e": "east", "w": "west"}
-    reverse_dirs = {"n": "south", "s": "north", "e": "west", "w": "east"}
     player = request.user.player
+    data = json.loads(request.body)
 
     cooldown_error = check_cooldown_error(player)
     if cooldown_error is not None:
         return cooldown_error
 
+    dirs={"n": "north", "s": "south", "e": "east", "w": "west"}
+    reverse_dirs = {"n": "south", "s": "north", "e": "west", "w": "east"}
     player_id = player.id
-    data = json.loads(request.body)
     direction = data['direction']
     room = player.room()
     nextRoomID = None
@@ -103,16 +102,16 @@ def move(request):
 @api_view(["POST"])
 def take(request):
     player = request.user.player
+    data = json.loads(request.body)
 
     cooldown_error = check_cooldown_error(player)
     if cooldown_error is not None:
         return cooldown_error
 
-    data = json.loads(request.body)
     alias = data['name']
     room = player.room()
     item = room.findItemByAlias(alias)
-    cooldown_seconds = 0.2 * time_factor
+    cooldown_seconds = 0.5 * time_factor
     if item is None:
         cooldown_seconds += PENALTY_ITEM_NOT_FOUND
     player.cooldown = timezone.now() + timedelta(0,cooldown_seconds)
@@ -129,16 +128,16 @@ def take(request):
 @api_view(["POST"])
 def drop(request):
     player = request.user.player
+    data = json.loads(request.body)
 
     cooldown_error = check_cooldown_error(player)
     if cooldown_error is not None:
         return cooldown_error
 
-    data = json.loads(request.body)
     alias = data['name']
     room = player.room()
     item = player.findItemByAlias(alias)
-    cooldown_seconds = 0.2 * time_factor
+    cooldown_seconds = 0.5 * time_factor
     if item is None:
         cooldown_seconds += PENALTY_ITEM_NOT_FOUND
     player.cooldown = timezone.now() + timedelta(0,cooldown_seconds)
@@ -150,6 +149,29 @@ def drop(request):
         messages.append(f"You have dropped {item.name}")
         room.addItem(item)
     return api_response(player, cooldown_seconds, errors=errors, messages=messages)
+
+
+@api_view(["POST"])
+def status(request):
+    player = request.user.player
+
+    cooldown_error = check_cooldown_error(player)
+    if cooldown_error is not None:
+        return cooldown_error
+
+    cooldown_seconds = 0.2 * time_factor
+
+    messages = []
+    response = JsonResponse({'name':player.user.username,
+                             'cooldown': cooldown_seconds,
+                             'strength': player.strength,
+                             'speed': player.speed,
+                             'gold': player.gold,
+                             'inventory': player.inventory(),
+                             'status': [],
+                             'messages': messages}, safe=True)
+
+    return response
 
 
 

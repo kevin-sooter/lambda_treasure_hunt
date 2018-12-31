@@ -81,6 +81,8 @@ class Player(models.Model):
         item.player = self
         item.room = None
         item.save()
+    def inventory(self):
+        return [i.name for i in Item.objects.filter(player=self)]
     def findItemByAlias(self, alias):
         lower_alias = alias.lower()
         for i in Item.objects.filter(player=self):
