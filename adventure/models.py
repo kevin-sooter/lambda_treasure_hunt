@@ -109,6 +109,10 @@ class Item(models.Model):
     aliases = models.CharField(max_length=200, default="")
     value = models.IntegerField(default=1)
     attributes = models.CharField(max_length=1000, default="{}")
+    def unsetItem(self):
+        self.player = None
+        self.room = None
+        self.save()
 
 
 

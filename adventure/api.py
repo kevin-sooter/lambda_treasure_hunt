@@ -17,11 +17,11 @@ time_factor = 2
 
 
 
-STORE_ROOM_ID=1
+SHOP_ROOM_ID=1
 
 
-
-PENALTY_ITEM_NOT_FOUND=5
+PENALTY_COOLDOWN_VIOLATION=5
+PENALTY_NOT_FOUND=5
 PENALTY_CANNOT_MOVE_THAT_WAY=5
 
 
@@ -32,8 +32,9 @@ def check_cooldown_error(player):
     """
     if player.cooldown > timezone.now():
         t_delta = (player.cooldown - timezone.now())
-        remaining_cooldown = t_delta.seconds + t_delta.microseconds / 1000000
-        return JsonResponse({"cooldown": remaining_cooldown, 'error_msg':"You must wait to do any actions"}, safe=True)
+        cooldown_seconds = t_delta.seconds + t_delta.microseconds / 1000000 + PENALTY_COOLDOWN_VIOLATION
+        player.cooldown = timezone.now() + timedelta(0,cooldown_seconds)
+        return JsonResponse({"cooldown": cooldown_seconds, 'errors':[f"Cooldown Violation: +{PENALTY_COOLDOWN_VIOLATION}s CD"]}, safe=True)
     return None
 
 def api_response(player, cooldown_seconds, errors=None, messages=None):
@@ -50,6 +51,23 @@ def api_response(player, cooldown_seconds, errors=None, messages=None):
                              'cooldown': cooldown_seconds,
                              'errors': errors,
                              'messages':messages}, safe=True)
+    return response
+
+
+def player_api_response(player, cooldown_seconds, errors=None, messages=None):
+    if errors is None:
+        errors = []
+    if messages is None:
+        messages = []
+    response = JsonResponse({'name':player.user.username,
+                             'cooldown': cooldown_seconds,
+                             'strength': player.strength,
+                             'speed': player.speed,
+                             'gold': player.gold,
+                             'inventory': player.inventory(),
+                             'status': [],
+                             'errors': errors,
+                             'messages': messages}, safe=True)
     return response
 
 
@@ -129,8 +147,8 @@ def take(request):
     errors = []
     messages = []
     if item is None:
-        cooldown_seconds += PENALTY_ITEM_NOT_FOUND
-        errors.append(f"Item not found: +{PENALTY_ITEM_NOT_FOUND}s CD")
+        cooldown_seconds += PENALTY_NOT_FOUND
+        errors.append(f"Item not found: +{PENALTY_NOT_FOUND}s CD")
     else:
         messages.append(f"You have picked up {item.name}")
         player.addItem(item)
@@ -155,8 +173,8 @@ def drop(request):
     errors = []
     messages = []
     if item is None:
-        cooldown_seconds += PENALTY_ITEM_NOT_FOUND
-        errors.append(f"Item not found: +{PENALTY_ITEM_NOT_FOUND}s CD")
+        cooldown_seconds += PENALTY_NOT_FOUND
+        errors.append(f"Item not found: +{PENALTY_NOT_FOUND}s CD")
     else:
         messages.append(f"You have dropped {item.name}")
         room.addItem(item)
@@ -175,17 +193,47 @@ def status(request):
 
     cooldown_seconds = 0.2 * time_factor
 
-    messages = []
-    response = JsonResponse({'name':player.user.username,
-                             'cooldown': cooldown_seconds,
-                             'strength': player.strength,
-                             'speed': player.speed,
-                             'gold': player.gold,
-                             'inventory': player.inventory(),
-                             'status': [],
-                             'messages': messages}, safe=True)
+    return player_api_response(player, cooldown_seconds)
 
-    return response
+
+@api_view(["POST"])
+def sell(request):
+    player = request.user.player
+    data = json.loads(request.body)
+
+    cooldown_error = check_cooldown_error(player)
+    if cooldown_error is not None:
+        return cooldown_error
+
+    cooldown_seconds = 0.2 * time_factor
+
+    errors = []
+    messages = []
+
+    if player.currentRoom != SHOP_ROOM_ID:
+        cooldown_seconds += PENALTY_NOT_FOUND
+        errors.append("Shop not found: +{PENALTY_NOT_FOUND}")
+    else:
+        item = player.findItemByAlias(data["name"])
+        if item is None:
+            cooldown_seconds += PENALTY_NOT_FOUND
+            errors.append(f"Item not found: +{PENALTY_NOT_FOUND}s CD")
+        elif "confirm" not in data or data["confirm"].lower() != "yes":
+            messages.append(f"I'll give you {item.value} gold for that {item.name}.")
+            messages.append(f"(include 'confirm':'yes' to sell {item.name})")
+        else:
+            messages.append(f"Thanks, I'll take that {item.name}.")
+            messages.append(f"You have received {item.value} gold.")
+            item.unsetItem()
+            player.gold += item.value
+
+    player.cooldown = timezone.now() + timedelta(0,cooldown_seconds)
+    player.save()
+    return api_response(player, cooldown_seconds, errors=errors, messages=messages)
+
+
+
+
 
 
 
