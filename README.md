@@ -41,9 +41,16 @@ curl -X GET -H 'Authorization: Token 547ab6e88f192b85f52157827b957eaf62645732' l
 
 curl -X POST -H 'Authorization: Token 547ab6e88f192b85f52157827b957eaf62645732' -H "Content-Type: application/json" -d '{"direction":"n"}' localhost:8000/api/adv/move/
 
+curl -X POST -H 'Authorization: Token 547ab6e88f192b85f52157827b957eaf62645732' -H "Content-Type: application/json" -d '{"direction":"s"}' localhost:8000/api/adv/move/
+
+curl -X POST -H 'Authorization: Token 547ab6e88f192b85f52157827b957eaf62645732' -H "Content-Type: application/json" -d '{"direction":"n", "next_room_id":1}' localhost:8000/api/adv/move/
 
 
 
 curl -X POST -H "Content-Type: application/json" -d '{"username":"testuser", "password":"testpassword"}' https://lambda-treasure-hunt.herokuapp.com/api/login/
 
+curl -X POST -H 'Authorization: Token 547ab6e88f192b85f52157827b957eaf62645732' -H "Content-Type: application/json" -d '{"name":"treasure"}' localhost:8000/api/adv/take/
 
+curl -X POST -H 'Authorization: Token 547ab6e88f192b85f52157827b957eaf62645732' -H "Content-Type: application/json" -d '{"name":"treasure"}' localhost:8000/api/adv/drop/
+
+curl -X POST -H 'Authorization: Token 547ab6e88f192b85f52157827b957eaf62645732' -H "Content-Type: application/json" localhost:8000/api/adv/status/

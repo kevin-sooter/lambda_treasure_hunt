@@ -71,12 +71,10 @@ def move(request):
 
     dirs={"n": "north", "s": "south", "e": "east", "w": "west"}
     reverse_dirs = {"n": "south", "s": "north", "e": "west", "w": "east"}
-    player_id = player.id
     direction = data['direction']
     room = player.room()
     nextRoomID = None
     cooldown_seconds = 1.0 * time_factor
-    player.cooldown = timezone.now() + timedelta(0,cooldown_seconds)
     errors = []
     messages = []
     if direction == "n":
@@ -90,10 +88,19 @@ def move(request):
     if nextRoomID is not None and nextRoomID >= 0:
         nextRoom = Room.objects.get(id=nextRoomID)
         player.currentRoom=nextRoomID
-        player.save()
         messages.append(f"You have walked {dirs[direction]}.")
+        if 'next_room_id' in data:
+            if data['next_room_id'] == nextRoomID:
+                messages.append(f"Wise Explorer: -50% CD")
+                cooldown_seconds /= 2
+            else:
+                errors.append(f"Foolish Explorer: +50% CD")
+                cooldown_seconds *= 1.5
     else:
-        errors.append(f"You cannot move that way: +{PENALTY_CANNOT_MOVE_THAT_WAY} cooldown")
+        cooldown_seconds += PENALTY_CANNOT_MOVE_THAT_WAY
+        errors.append(f"You cannot move that way: +{PENALTY_CANNOT_MOVE_THAT_WAY}s CD")
+    player.cooldown = timezone.now() + timedelta(0,cooldown_seconds)
+    player.save()
     return api_response(player, cooldown_seconds, errors=errors, messages=messages)
 
 
@@ -112,16 +119,16 @@ def take(request):
     room = player.room()
     item = room.findItemByAlias(alias)
     cooldown_seconds = 0.5 * time_factor
-    if item is None:
-        cooldown_seconds += PENALTY_ITEM_NOT_FOUND
-    player.cooldown = timezone.now() + timedelta(0,cooldown_seconds)
     errors = []
     messages = []
     if item is None:
-        errors.append(f"Item not found: +{PENALTY_ITEM_NOT_FOUND} cooldown")
+        cooldown_seconds += PENALTY_ITEM_NOT_FOUND
+        errors.append(f"Item not found: +{PENALTY_ITEM_NOT_FOUND}s CD")
     else:
         messages.append(f"You have picked up {item.name}")
         player.addItem(item)
+    player.cooldown = timezone.now() + timedelta(0,cooldown_seconds)
+    player.save()
     return api_response(player, cooldown_seconds, errors=errors, messages=messages)
 
 
@@ -138,16 +145,16 @@ def drop(request):
     room = player.room()
     item = player.findItemByAlias(alias)
     cooldown_seconds = 0.5 * time_factor
-    if item is None:
-        cooldown_seconds += PENALTY_ITEM_NOT_FOUND
-    player.cooldown = timezone.now() + timedelta(0,cooldown_seconds)
     errors = []
     messages = []
     if item is None:
-        errors.append(f"Item not found: +{PENALTY_ITEM_NOT_FOUND} cooldown")
+        cooldown_seconds += PENALTY_ITEM_NOT_FOUND
+        errors.append(f"Item not found: +{PENALTY_ITEM_NOT_FOUND}s CD")
     else:
         messages.append(f"You have dropped {item.name}")
         room.addItem(item)
+    player.cooldown = timezone.now() + timedelta(0,cooldown_seconds)
+    player.save()
     return api_response(player, cooldown_seconds, errors=errors, messages=messages)
 
 
