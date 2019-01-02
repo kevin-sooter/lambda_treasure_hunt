@@ -121,7 +121,7 @@ def move(request):
         player.currentRoom=nextRoomID
         messages.append(f"You have walked {dirs[direction]}.")
         if 'next_room_id' in data:
-            if data['next_room_id'] == nextRoomID:
+            if data['next_room_id'].isdigit() and int(data['next_room_id']) == nextRoomID:
                 messages.append(f"Wise Explorer: -50% CD")
                 cooldown_seconds /= 2
             else:

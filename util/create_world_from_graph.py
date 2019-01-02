@@ -1,6 +1,6 @@
 from django.contrib.auth.models import User
 from adventure.models import Player, Room, Item
-
+import random
 
 Room.objects.all().delete()
 
@@ -37,14 +37,17 @@ for p in players:
 Item.objects.all().delete()
 
 
-t = Item(name="Small Treasure",
-         description="This is a small piece of treasure",
-         weight=2,
-         aliases="small treasure,treasure",
-         value=100,
-         attributes='{"default":1}',
-         room=Room.objects.first())
-t.save()
+
+for i in range(0, 100):
+  if random.random() > 0.7:
+    t = Item(name="Small Treasure",
+             description="This is a small piece of treasure",
+             weight=2,
+             aliases="small treasure,treasure",
+             value=100,
+             attributes='{"default":1}',
+             room=Room.objects.get(id=i))
+    t.save()
 
 
 
