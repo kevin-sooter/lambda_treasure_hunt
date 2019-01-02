@@ -34,7 +34,7 @@ def check_cooldown_error(player):
         t_delta = (player.cooldown - timezone.now())
         cooldown_seconds = t_delta.seconds + t_delta.microseconds / 1000000 + PENALTY_COOLDOWN_VIOLATION
         player.cooldown = timezone.now() + timedelta(0,cooldown_seconds)
-        return JsonResponse({"cooldown": cooldown_seconds, 'errors':[f"Cooldown Violation: +{PENALTY_COOLDOWN_VIOLATION}s CD"]}, safe=True)
+        return JsonResponse({"cooldown": cooldown_seconds, 'errors':[f"Cooldown Violation: +{PENALTY_COOLDOWN_VIOLATION}s CD"]}, safe=True, status=400)
     return None
 
 def api_response(player, cooldown_seconds, errors=None, messages=None):
@@ -77,13 +77,17 @@ def player_api_response(player, cooldown_seconds, errors=None, messages=None):
 @csrf_exempt
 @api_view(["GET"])
 def initialize(request):
-    user = request.user
-    player = user.player
-    player_id = player.id
-    uuid = player.uuid
-    room = player.room()
-    players = room.playerNames(player_id)
-    return JsonResponse({'uuid': uuid, 'name':player.user.username, 'title':room.title, 'description':room.description, 'players':players}, safe=True)
+    player = request.user.player
+
+    cooldown_error = check_cooldown_error(player)
+    if cooldown_error is not None:
+        return cooldown_error
+
+    cooldown_seconds = 1.0 * time_factor
+    player.cooldown = timezone.now() + timedelta(0,cooldown_seconds)
+    player.save()
+
+    return api_response(player, cooldown_seconds)
 
 
 @api_view(["POST"])
