@@ -43,7 +43,8 @@ def api_response(player, cooldown_seconds, errors=None, messages=None):
     if messages is None:
         messages = []
     room = player.room()
-    response = JsonResponse({'title':room.title,
+    response = JsonResponse({'room_id':room.id,
+                             'title':room.title,
                              'description':room.description,
                              'players':room.playerNames(player.id),
                              'items':room.itemNames(),
@@ -88,6 +89,7 @@ def initialize(request):
 @api_view(["POST"])
 def move(request):
     player = request.user.player
+    # import pdb; pdb.set_trace()
     data = json.loads(request.body)
 
     cooldown_error = check_cooldown_error(player)
