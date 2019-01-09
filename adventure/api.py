@@ -34,6 +34,7 @@ def check_cooldown_error(player):
         t_delta = (player.cooldown - timezone.now())
         cooldown_seconds = t_delta.seconds + t_delta.microseconds / 1000000 + PENALTY_COOLDOWN_VIOLATION
         player.cooldown = timezone.now() + timedelta(0,cooldown_seconds)
+        player.save()
         return JsonResponse({"cooldown": cooldown_seconds, 'errors':[f"Cooldown Violation: +{PENALTY_COOLDOWN_VIOLATION}s CD"]}, safe=True, status=400)
     return None
 
