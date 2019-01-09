@@ -47,6 +47,7 @@ def api_response(player, cooldown_seconds, errors=None, messages=None):
     response = JsonResponse({'room_id':room.id,
                              'title':room.title,
                              'description':room.description,
+                             'coordinates':room.coordinates,
                              'players':room.playerNames(player.id),
                              'items':room.itemNames(),
                              'exits':room.exits(),
