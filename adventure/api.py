@@ -13,7 +13,7 @@ from datetime import datetime, timedelta
 # instantiate pusher
 pusher = Pusher(app_id=config('PUSHER_APP_ID'), key=config('PUSHER_KEY'), secret=config('PUSHER_SECRET'), cluster=config('PUSHER_CLUSTER'))
 
-time_factor = 2
+time_factor = float(config('TIME_FACTOR'))
 
 
 
