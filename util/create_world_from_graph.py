@@ -12,7 +12,7 @@ numRooms = len(roomGraph)
 rooms = [None] * numRooms
 for i in range(0, numRooms):
     x = roomGraph[i][0][0]
-    rooms[i] = Room(title=f"Room {i}", description=f"({roomGraph[i][0][0]},{roomGraph[i][0][1]})",id=i)
+    rooms[i] = Room(title=f"Room {i}", description=f"You are standing in an empty room.", coordinates=f"({roomGraph[i][0][0]},{roomGraph[i][0][1]})",id=i)
     rooms[i].save()
 
 
