@@ -45,6 +45,7 @@ for i in range(0, 100):
              weight=2,
              aliases="small treasure,treasure",
              value=100,
+             itemtype="TREASURE",
              attributes='{"default":1}',
              room=Room.objects.get(id=i))
     t.save()
