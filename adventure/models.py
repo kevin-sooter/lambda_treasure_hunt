@@ -68,6 +68,8 @@ class Player(models.Model):
     gold = models.IntegerField(default=0)
     strength = models.IntegerField(default=10)
     speed = models.IntegerField(default=10)
+    bodywear = models.IntegerField(default=0)
+    footwear = models.IntegerField(default=0)
     def initialize(self):
         if self.currentRoom == 0:
             self.currentRoom = Room.objects.first().id
@@ -109,6 +111,7 @@ class Item(models.Model):
     weight = models.IntegerField(default=1)
     aliases = models.CharField(max_length=200, default="")
     value = models.IntegerField(default=1)
+    itemtype = models.CharField(max_length=20, default="DEFAULT")
     attributes = models.CharField(max_length=1000, default="{}")
     def unsetItem(self):
         self.player = None
