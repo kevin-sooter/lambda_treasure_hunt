@@ -101,6 +101,16 @@ class Player(models.Model):
             self.footwear = item
         else:
             return False
+        return True
+    # def removeItem(self, item):
+    #     if item.player.id != self.id:
+    #         return False
+    #     if item.itemtype == "BODYWEAR":
+    #         self.bodywear = item
+    #     elif item.itemtype != "FOOTWEAR":
+    #         self.footwear = item
+    #     else:
+    #         return False
 
 
 @receiver(post_save, sender=User)
