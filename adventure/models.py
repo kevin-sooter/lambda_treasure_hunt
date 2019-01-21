@@ -92,6 +92,19 @@ class Player(models.Model):
             if lower_alias in i.aliases.split(","):
                 return i
         return None
+    def wearItem(self, item):
+        if item.player.id != self.id:
+            return False
+        if item.itemtype == "BODYWEAR":
+            self.bodywear = item
+        elif item.itemtype != "FOOTWEAR":
+            self.footwear = item
+        else:
+            return False
+        self.adjust_stats()
+    def adjust_stats(self):
+        pass
+
 
 @receiver(post_save, sender=User)
 def create_user_player(sender, instance, created, **kwargs):
