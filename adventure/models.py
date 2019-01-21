@@ -101,9 +101,6 @@ class Player(models.Model):
             self.footwear = item
         else:
             return False
-        self.adjust_stats()
-    def adjust_stats(self):
-        pass
 
 
 @receiver(post_save, sender=User)
