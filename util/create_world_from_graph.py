@@ -51,6 +51,26 @@ for i in range(0, 100):
     t.save()
 
 
+t = Item(name="boots",
+         description="These are boots",
+         weight=2,
+         aliases="boots",
+         value=100,
+         itemtype="FOOTWEAR",
+         attributes='{"default":1}',
+         room=Room.objects.get(id=0))
+t.save()
+
+t = Item(name="jacket",
+         description="This is a jacket",
+         weight=2,
+         aliases="jacket",
+         value=100,
+         itemtype="BODYWEAR",
+         attributes='{"default":1}',
+         room=Room.objects.get(id=0))
+t.save()
+
 
 
 

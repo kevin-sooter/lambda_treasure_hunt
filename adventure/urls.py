@@ -8,4 +8,6 @@ urlpatterns = [
     url('drop', api.drop),
     url('status', api.status),
     url('sell', api.sell),
+    url('wear', api.wear),
+    url('remove', api.remove),
 ]

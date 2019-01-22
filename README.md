@@ -52,13 +52,15 @@ curl -X POST -H 'Authorization: Token 547ab6e88f192b85f52157827b957eaf62645732' 
 
 curl -X POST -H "Content-Type: application/json" -d '{"username":"testuser", "password":"testpassword"}' https://lambda-treasure-hunt.herokuapp.com/api/login/
 
-curl -X POST -H 'Authorization: Token 547ab6e88f192b85f52157827b957eaf62645732' -H "Content-Type: application/json" -d '{"name":"treasure"}' localhost:8000/api/adv/take/
+curl -X POST -H 'Authorization: Token 547ab6e88f192b85f52157827b957eaf62645732' -H "Content-Type: application/json" -d '{"name":"boots"}' localhost:8000/api/adv/take/
 
 curl -X POST -H 'Authorization: Token 547ab6e88f192b85f52157827b957eaf62645732' -H "Content-Type: application/json" -d '{"name":"treasure"}' localhost:8000/api/adv/drop/
 
 curl -X POST -H 'Authorization: Token 547ab6e88f192b85f52157827b957eaf62645732' -H "Content-Type: application/json" localhost:8000/api/adv/status/
 
 curl -X POST -H 'Authorization: Token 547ab6e88f192b85f52157827b957eaf62645732' -H "Content-Type: application/json" -d '{"name":"treasure"}' localhost:8000/api/adv/sell/
+
+curl -X POST -H 'Authorization: Token 547ab6e88f192b85f52157827b957eaf62645732' -H "Content-Type: application/json" -d '{"name":"boots"}' localhost:8000/api/adv/wear/
 
 
 curl -X POST -H 'Authorization: Token 547ab6e88f192b85f52157827b957eaf62645732' -H "Content-Type: application/json" -d '{"name":"treasure", "confirm":"yes"}' localhost:8000/api/adv/sell/

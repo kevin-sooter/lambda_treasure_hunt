@@ -96,9 +96,9 @@ class Player(models.Model):
         if item.player.id != self.id:
             return False
         if item.itemtype == "BODYWEAR":
-            self.bodywear = item
-        elif item.itemtype != "FOOTWEAR":
-            self.footwear = item
+            self.bodywear = item.id
+        elif item.itemtype == "FOOTWEAR":
+            self.footwear = item.id
         else:
             return False
         return True

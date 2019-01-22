@@ -267,6 +267,33 @@ def wear(request):
     return api_response(player, cooldown_seconds, errors=errors, messages=messages)
 
 
+@api_view(["POST"])
+def remove(request):
+    player = request.user.player
+    data = json.loads(request.body)
+
+    cooldown_error = check_cooldown_error(player)
+    if cooldown_error is not None:
+        return cooldown_error
+
+    # alias = data['name']
+    # item = player.findItemByAlias(alias)
+    # cooldown_seconds = 0.5 * time_factor
+    # errors = []
+    # messages = []
+    # if item is None:
+    #     cooldown_seconds += PENALTY_NOT_FOUND
+    #     errors.append(f"Item not found: +{PENALTY_NOT_FOUND}s CD")
+    # else:
+    #     if player.wearItem(item):
+    #         messages.append(f"You wear {item.name}")
+    #     else:
+    #         messages.append(f"You cannot wear {item.name}")
+    # player.cooldown = timezone.now() + timedelta(0,cooldown_seconds)
+    # player.save()
+    return api_response(player, cooldown_seconds, errors=errors, messages=messages)
+
+
 
 
 
