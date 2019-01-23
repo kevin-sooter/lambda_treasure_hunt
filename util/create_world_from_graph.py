@@ -36,8 +36,6 @@ for p in players:
 
 Item.objects.all().delete()
 
-
-
 for i in range(0, 100):
   if random.random() > 0.7:
     t = Item(name="Small Treasure",
