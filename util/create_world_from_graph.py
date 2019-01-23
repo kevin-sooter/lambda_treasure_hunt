@@ -57,7 +57,7 @@ t = Item(name="boots",
          aliases="boots",
          value=100,
          itemtype="FOOTWEAR",
-         attributes='{"default":1}',
+         attributes='{"SPEED":1}',
          room=Room.objects.get(id=0))
 t.save()
 
@@ -67,17 +67,8 @@ t = Item(name="jacket",
          aliases="jacket",
          value=100,
          itemtype="BODYWEAR",
-         attributes='{"default":1}',
+         attributes='{"STRENGTH":1}',
          room=Room.objects.get(id=0))
 t.save()
-
-
-
-
-
-
-
-
-
 
 
