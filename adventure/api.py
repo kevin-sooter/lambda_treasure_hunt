@@ -64,6 +64,7 @@ def player_api_response(player, cooldown_seconds, errors=None, messages=None):
         messages = []
     response = JsonResponse({'name':player.user.username,
                              'cooldown': cooldown_seconds,
+                             'encumbrance': player.encumbrance,
                              'strength': player.strength,
                              'speed': player.speed,
                              'gold': player.gold,
@@ -122,6 +123,9 @@ def move(request):
         nextRoom = Room.objects.get(id=nextRoomID)
         player.currentRoom=nextRoomID
         messages.append(f"You have walked {dirs[direction]}.")
+        if player.strength <= player.encumbrance:
+            errors.append(f"Heavily Encumbered: +100% CD")
+            cooldown_seconds *= 2
         if 'next_room_id' in data:
             if data['next_room_id'].isdigit() and int(data['next_room_id']) == nextRoomID:
                 messages.append(f"Wise Explorer: -50% CD")

@@ -38,7 +38,10 @@ class Room(models.Model):
         return [p.uuid for p in Player.objects.filter(currentRoom=self.id) if p.id != int(currentPlayerID)]
     def addItem(self, item):
         item.room = self
-        item.player = None
+        if item.player is not None:
+            p = item.player
+            item.player = None
+            p.save()
         item.save()
     def findItemByAlias(self, alias):
         lower_alias = alias.lower()
@@ -70,6 +73,7 @@ class Player(models.Model):
     speed = models.IntegerField(default=10)
     bodywear = models.IntegerField(default=0)
     footwear = models.IntegerField(default=0)
+    encumbrance = models.IntegerField(default=0)
     def initialize(self):
         if self.currentRoom == 0:
             self.currentRoom = Room.objects.first().id
@@ -111,6 +115,14 @@ class Player(models.Model):
     #         self.footwear = item
     #     else:
     #         return False
+    def save(self, *args, **kwargs):
+        items = Item.objects.filter(player=self)
+        weight = 0
+        for item in items:
+            weight += item.weight
+        self.encumbrance = weight
+        print(f"\n\n****{self.encumbrance}****\n")
+        super(Player, self).save(*args, **kwargs)
 
 
 @receiver(post_save, sender=User)
@@ -134,7 +146,10 @@ class Item(models.Model):
     itemtype = models.CharField(max_length=20, default="DEFAULT")
     attributes = models.CharField(max_length=1000, default="{}")
     def unsetItem(self):
-        self.player = None
+        if self.player is None:
+            p = self.player
+            self.player = None
+            p.save()
         self.room = None
         self.save()
 
