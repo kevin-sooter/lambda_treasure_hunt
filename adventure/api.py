@@ -24,7 +24,7 @@ PENALTY_COOLDOWN_VIOLATION=5
 PENALTY_NOT_FOUND=5
 PENALTY_CANNOT_MOVE_THAT_WAY=5
 
-
+MAX_COOLDOWN = 600
 
 def check_cooldown_error(player):
     """
@@ -32,7 +32,7 @@ def check_cooldown_error(player):
     """
     if player.cooldown > timezone.now():
         t_delta = (player.cooldown - timezone.now())
-        cooldown_seconds = t_delta.seconds + t_delta.microseconds / 1000000 + PENALTY_COOLDOWN_VIOLATION
+        cooldown_seconds = min(MAX_COOLDOWN, t_delta.seconds + t_delta.microseconds / 1000000 + PENALTY_COOLDOWN_VIOLATION)
         player.cooldown = timezone.now() + timedelta(0,cooldown_seconds)
         player.save()
         return JsonResponse({"cooldown": cooldown_seconds, 'errors':[f"Cooldown Violation: +{PENALTY_COOLDOWN_VIOLATION}s CD"]}, safe=True, status=400)
