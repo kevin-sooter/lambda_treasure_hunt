@@ -16,7 +16,6 @@ pusher = Pusher(app_id=config('PUSHER_APP_ID'), key=config('PUSHER_KEY'), secret
 time_factor = float(config('TIME_FACTOR'))
 
 
-
 SHOP_ROOM_ID=1
 
 
@@ -297,6 +296,37 @@ def remove(request):
     # player.save()
     return api_response(player, cooldown_seconds, errors=errors, messages=messages)
 
+
+@api_view(["POST"])
+def examine(request):
+    player = request.user.player
+    data = json.loads(request.body)
+
+    cooldown_error = check_cooldown_error(player)
+    if cooldown_error is not None:
+        return cooldown_error
+
+    alias = data['name']
+    item = player.findItemByAlias(alias)
+    if item is None:
+        item = room.findItemByAlias(alias)
+    if item is None:
+        item = room.findPlayerByName(alias)
+
+    cooldown_seconds = 0.5 * time_factor
+    errors = []
+    messages = []
+    if item is None:
+        cooldown_seconds += PENALTY_NOT_FOUND
+        errors.append(f"You do not see that here: +{PENALTY_NOT_FOUND}s CD")
+    else:
+        if player.wearItem(item):
+            messages.append(f"You wear {item.name}")
+        else:
+            messages.append(f"You cannot wear {item.name}")
+    player.cooldown = timezone.now() + timedelta(0,cooldown_seconds)
+    player.save()
+    return api_response(player, cooldown_seconds, errors=errors, messages=messages)
 
 
 

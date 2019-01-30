@@ -49,6 +49,8 @@ class Room(models.Model):
             if lower_alias in i.aliases.split(","):
                 return i
         return None
+    def findPlayerByName(self, name):
+        return [p for p in Player.objects.filter(currentRoom=self.id) if p.user.username == name.lower()]
     def itemNames(self):
         return [i.name for i in Item.objects.filter(room=self)]
     def exits(self):
@@ -65,6 +67,8 @@ class Room(models.Model):
 
 class Player(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
+    name = models.CharField(max_length=16, default=uuid.uuid4, unique=True)
+    description = models.CharField(max_length=140, default=" looks like an ordinary person.")
     currentRoom = models.IntegerField(default=0)
     uuid = models.UUIDField(default=uuid.uuid4, unique=True)
     cooldown = models.DateTimeField(blank=True, auto_now_add=True)
@@ -128,7 +132,7 @@ class Player(models.Model):
 @receiver(post_save, sender=User)
 def create_user_player(sender, instance, created, **kwargs):
     if created:
-        Player.objects.create(user=instance)
+        Player.objects.create(user=instance, name=instance.username.lower())
         Token.objects.create(user=instance)
 
 @receiver(post_save, sender=User)
