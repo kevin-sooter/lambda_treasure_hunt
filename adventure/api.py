@@ -23,6 +23,7 @@ PENALTY_COOLDOWN_VIOLATION=5
 PENALTY_NOT_FOUND=5
 PENALTY_CANNOT_MOVE_THAT_WAY=5
 
+MIN_COOLDOWN = 1
 MAX_COOLDOWN = 600
 
 def check_cooldown_error(player):
@@ -74,6 +75,10 @@ def player_api_response(player, cooldown_seconds, errors=None, messages=None):
     return response
 
 
+def get_cooldown(player, cooldown_scale):
+    speed_adjustment = player.speed - 10
+    return max(MIN_COOLDOWN, cooldown_scale * time_factor - speed_adjustment)
+
 
 
 @csrf_exempt
@@ -85,7 +90,7 @@ def initialize(request):
     if cooldown_error is not None:
         return cooldown_error
 
-    cooldown_seconds = 1.0 * time_factor
+    cooldown_seconds = get_cooldown(player, 1.0)
     player.cooldown = timezone.now() + timedelta(0,cooldown_seconds)
     player.save()
 
@@ -107,7 +112,7 @@ def move(request):
     direction = data['direction']
     room = player.room()
     nextRoomID = None
-    cooldown_seconds = 1.0 * time_factor
+    cooldown_seconds = get_cooldown(player, 1.0)
     errors = []
     messages = []
     if direction == "n":
@@ -154,7 +159,7 @@ def take(request):
     alias = data['name']
     room = player.room()
     item = room.findItemByAlias(alias)
-    cooldown_seconds = 0.5 * time_factor
+    cooldown_seconds = get_cooldown(player, 0.5)
     errors = []
     messages = []
     if item is None:
@@ -180,7 +185,7 @@ def drop(request):
     alias = data['name']
     room = player.room()
     item = player.findItemByAlias(alias)
-    cooldown_seconds = 0.5 * time_factor
+    cooldown_seconds = get_cooldown(player, 0.5)
     errors = []
     messages = []
     if item is None:
@@ -202,7 +207,7 @@ def status(request):
     if cooldown_error is not None:
         return cooldown_error
 
-    cooldown_seconds = 0.2 * time_factor
+    cooldown_seconds = get_cooldown(player, 0.2)
 
     return player_api_response(player, cooldown_seconds)
 
@@ -216,7 +221,7 @@ def sell(request):
     if cooldown_error is not None:
         return cooldown_error
 
-    cooldown_seconds = 0.2 * time_factor
+    cooldown_seconds = get_cooldown(player, 0.2)
 
     errors = []
     messages = []
@@ -254,7 +259,7 @@ def wear(request):
 
     alias = data['name']
     item = player.findItemByAlias(alias)
-    cooldown_seconds = 0.5 * time_factor
+    cooldown_seconds = get_cooldown(player, 0.5)
     errors = []
     messages = []
     if item is None:
@@ -281,7 +286,7 @@ def remove(request):
 
     # alias = data['name']
     # item = player.findItemByAlias(alias)
-    # cooldown_seconds = 0.5 * time_factor
+    # cooldown_seconds = get_cooldown(player, 0.5)
     # errors = []
     # messages = []
     # if item is None:
@@ -313,7 +318,7 @@ def examine(request):
     if item is None:
         item = room.findPlayerByName(alias)
 
-    cooldown_seconds = 0.5 * time_factor
+    cooldown_seconds = get_cooldown(player, 0.5)
     errors = []
     messages = []
     if item is None:
