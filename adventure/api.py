@@ -87,6 +87,8 @@ def player_api_response(player, cooldown_seconds, errors=None, messages=None):
 
 def get_cooldown(player, cooldown_scale):
     speed_adjustment = player.speed - 10
+    if player.is_pm:
+        time_factor = min(time_factor, 5)
     return max(MIN_COOLDOWN, cooldown_scale * time_factor - speed_adjustment)
 
 
