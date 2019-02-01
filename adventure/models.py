@@ -70,6 +70,7 @@ class Room(models.Model):
 class Player(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=64, unique=True, null=True)
+    is_pm = models.BooleanField(default=False)
     description = models.CharField(max_length=140, default=" looks like an ordinary person.")
     currentRoom = models.IntegerField(default=0)
     uuid = models.UUIDField(default=uuid.uuid4, unique=True)
