@@ -13,9 +13,6 @@ from datetime import datetime, timedelta
 # instantiate pusher
 pusher = Pusher(app_id=config('PUSHER_APP_ID'), key=config('PUSHER_KEY'), secret=config('PUSHER_SECRET'), cluster=config('PUSHER_CLUSTER'))
 
-time_factor = float(config('TIME_FACTOR'))
-
-
 SHOP_ROOM_ID=1
 
 
@@ -87,6 +84,7 @@ def player_api_response(player, cooldown_seconds, errors=None, messages=None):
 
 def get_cooldown(player, cooldown_scale):
     speed_adjustment = player.speed - 10
+    time_factor = float(config('TIME_SCALE'))
     if player.is_pm:
         time_factor = min(time_factor, 5)
     return max(MIN_COOLDOWN, cooldown_scale * time_factor - speed_adjustment)
