@@ -46,14 +46,24 @@ def api_response(player, cooldown_seconds, errors=None, messages=None):
     room = player.room()
     response = JsonResponse({'room_id':room.id,
                              'title':room.title,
-                             'description':room.description,
+                             'description':"It is too dark to see anything.",
                              'coordinates':room.coordinates,
                              'players':room.playerNames(player.id),
-                             'items':room.itemNames(),
+                             'items':[],
                              'exits':room.exits(),
                              'cooldown': cooldown_seconds,
                              'errors': errors,
                              'messages':messages}, safe=True)
+    # response = JsonResponse({'room_id':room.id,
+    #                          'title':room.title,
+    #                          'description':room.description,
+    #                          'coordinates':room.coordinates,
+    #                          'players':room.playerNames(player.id),
+    #                          'items':room.itemNames(),
+    #                          'exits':room.exits(),
+    #                          'cooldown': cooldown_seconds,
+    #                          'errors': errors,
+    #                          'messages':messages}, safe=True)
     return response
 
 
