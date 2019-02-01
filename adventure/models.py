@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from rest_framework.authtoken.models import Token
+import json
 import uuid
 
 class Room(models.Model):
@@ -122,10 +123,19 @@ class Player(models.Model):
     def save(self, *args, **kwargs):
         items = Item.objects.filter(player=self)
         weight = 0
+        base_speed = 10
+        base_strength = 10
         for item in items:
             weight += item.weight
+            if item.id == self.footwear or item.id == self.bodywear:
+                attr = json.loads(item.attributes)
+                if 'SPEED' in attr:
+                    base_speed += attr['SPEED']
+                if 'STRENGTH' in attr:
+                    base_strength += attr['STRENGTH']
         self.encumbrance = weight
-        print(f"\n\n****{self.encumbrance}****\n")
+        self.speed = base_speed
+        self.strength = base_strength
         super(Player, self).save(*args, **kwargs)
 
 
