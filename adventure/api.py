@@ -41,26 +41,28 @@ def api_response(player, cooldown_seconds, errors=None, messages=None):
     if messages is None:
         messages = []
     room = player.room()
-    response = JsonResponse({'room_id':room.id,
-                             'title': "Darkness",
-                             'description':"It is too dark to see anything.",
-                             'coordinates':room.coordinates,
-                             'players':room.playerNames(player.id),
-                             'items':[],
-                             'exits':room.exits(),
-                             'cooldown': cooldown_seconds,
-                             'errors': errors,
-                             'messages':messages}, safe=True)
-    # response = JsonResponse({'room_id':room.id,
-    #                          'title':room.title,
-    #                          'description':room.description,
-    #                          'coordinates':room.coordinates,
-    #                          'players':room.playerNames(player.id),
-    #                          'items':room.itemNames(),
-    #                          'exits':room.exits(),
-    #                          'cooldown': cooldown_seconds,
-    #                          'errors': errors,
-    #                          'messages':messages}, safe=True)
+    if player.is_pm:
+        response = JsonResponse({'room_id':room.id,
+                                 'title':room.title,
+                                 'description':room.description,
+                                 'coordinates':room.coordinates,
+                                 'players':room.playerNames(player.id, True),
+                                 'items':room.itemNames(),
+                                 'exits':room.exits(),
+                                 'cooldown': cooldown_seconds,
+                                 'errors': errors,
+                                 'messages':messages}, safe=True)
+    else:
+        response = JsonResponse({'room_id':room.id,
+                                 'title': "Darkness",
+                                 'description':"It is too dark to see anything.",
+                                 'coordinates':room.coordinates,
+                                 'players':room.playerNames(player.id),
+                                 'items':[],
+                                 'exits':room.exits(),
+                                 'cooldown': cooldown_seconds,
+                                 'errors': errors,
+                                 'messages':messages}, safe=True)
     return response
 
 

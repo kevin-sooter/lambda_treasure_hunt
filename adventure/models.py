@@ -33,9 +33,11 @@ class Room(models.Model):
                 print("Invalid direction")
                 return
             self.save()
-    def playerNames(self, currentPlayerID):
-        # return [p.user.username for p in Player.objects.filter(currentRoom=self.id) if p.id != int(currentPlayerID)]
-        return ["ghost" for p in Player.objects.filter(currentRoom=self.id) if p.id != int(currentPlayerID)]
+    def playerNames(self, currentPlayerID, isPM=False):
+        if isPM:
+            return [p.user.username for p in Player.objects.filter(currentRoom=self.id) if p.id != int(currentPlayerID)]
+        else:
+            return ["ghost" for p in Player.objects.filter(currentRoom=self.id) if p.id != int(currentPlayerID)]
     def playerUUIDs(self, currentPlayerID):
         return [p.uuid for p in Player.objects.filter(currentRoom=self.id) if p.id != int(currentPlayerID)]
     def addItem(self, item):
