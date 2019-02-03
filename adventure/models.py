@@ -164,13 +164,21 @@ class Item(models.Model):
     itemtype = models.CharField(max_length=20, default="DEFAULT")
     attributes = models.CharField(max_length=1000, default="{}")
     level = models.IntegerField(default=1)
-    def unsetItem(self):
+    def unsetPlayer(self):
         if self.player is None:
             p = self.player
             self.player = None
             p.save()
+    def unsetItem(self):
+        self.unsetPlayer()
         self.room = None
         self.save()
+    def levelUpAndRespawn(self):
+        self.unsetPlayer()
+        numRooms = Room.objects.count()
+        randomID = random.randint(2, Room.objects.count() - 1)
+        self.room = Room.objects.get(id=randomID)
+        exp += 1
 
 
 

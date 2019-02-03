@@ -252,7 +252,10 @@ def sell(request):
         else:
             messages.append(f"Thanks, I'll take that {item.name}.")
             messages.append(f"You have received {item.value} gold.")
-            item.unsetItem()
+            if item.itemtype == "TREASURE":
+                item.levelUpAndRespawn()
+            else:
+                item.unsetItem()
             player.gold += item.value
 
     player.cooldown = timezone.now() + timedelta(0,cooldown_seconds)
