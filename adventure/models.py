@@ -163,6 +163,7 @@ class Item(models.Model):
     value = models.IntegerField(default=1)
     itemtype = models.CharField(max_length=20, default="DEFAULT")
     attributes = models.CharField(max_length=1000, default="{}")
+    level = models.IntegerField(default=1)
     def unsetItem(self):
         if self.player is None:
             p = self.player
