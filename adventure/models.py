@@ -164,6 +164,7 @@ class Item(models.Model):
     itemtype = models.CharField(max_length=20, default="DEFAULT")
     attributes = models.CharField(max_length=1000, default="{}")
     level = models.IntegerField(default=1)
+    exp = models.IntegerField(default=0)
     def unsetPlayer(self):
         if self.player is None:
             p = self.player
