@@ -57,8 +57,6 @@ def api_response(player, cooldown_seconds, errors=None, messages=None):
                                  'title': "Darkness",
                                  'description':"It is too dark to see anything.",
                                  'coordinates':room.coordinates,
-                                 'players':room.playerNames(player.id),
-                                 'items':[],
                                  'exits':room.exits(),
                                  'cooldown': cooldown_seconds,
                                  'errors': errors,
@@ -140,14 +138,14 @@ def move(request):
         player.currentRoom=nextRoomID
         messages.append(f"You have walked {dirs[direction]}.")
         if player.strength <= player.encumbrance:
-            errors.append(f"Heavily Encumbered: +100% CD")
+            messages.append(f"Heavily Encumbered: +100% CD")
             cooldown_seconds *= 2
         if 'next_room_id' in data:
             if data['next_room_id'].isdigit() and int(data['next_room_id']) == nextRoomID:
                 messages.append(f"Wise Explorer: -50% CD")
                 cooldown_seconds /= 2
             else:
-                errors.append(f"Foolish Explorer: +50% CD")
+                messages.append(f"Foolish Explorer: +50% CD")
                 cooldown_seconds *= 1.5
     else:
         cooldown_seconds += PENALTY_CANNOT_MOVE_THAT_WAY
