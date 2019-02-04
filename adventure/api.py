@@ -100,7 +100,7 @@ def initialize(request):
     if cooldown_error is not None:
         return cooldown_error
 
-    cooldown_seconds = get_cooldown(player, 1.0)
+    cooldown_seconds = get_cooldown(player, 0.0)
     player.cooldown = timezone.now() + timedelta(0,cooldown_seconds)
     player.save()
 
